@@ -36,6 +36,7 @@ CLIENT_TYPES = struct(
     el="execution",
     cl="beacon",
     validator="validator",
+    remote_signer="remote_signer",
 )
 
 VALIDATING_REWARDS_ACCOUNT = "0x8943545177806ED17B9F23F0a21ee5948eCaa776"

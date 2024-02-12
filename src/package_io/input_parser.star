@@ -181,13 +181,18 @@ def input_parser(plan, input_args):
                 validator_client_type=participant["validator_client_type"],
                 validator_client_image=participant["validator_client_image"],
                 validator_client_log_level=participant["validator_client_log_level"],
+                use_remote_signer=participant["use_remote_signer"],
+                remote_signer_image=participant["remote_signer_image"],
                 validator_tolerations=participant["validator_tolerations"],
+                remote_signer_tolerations=participant["remote_signer_tolerations"],
                 tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
                 validator_extra_labels=participant["validator_extra_labels"],
+                remote_signer_extra_params=participant["remote_signer_extra_params"],
+                remote_signer_extra_labels=participant["remote_signer_extra_labels"],
                 builder_network_params=participant["builder_network_params"],
                 el_min_cpu=participant["el_min_cpu"],
                 el_max_cpu=participant["el_max_cpu"],
@@ -201,6 +206,10 @@ def input_parser(plan, input_args):
                 v_max_cpu=participant["v_max_cpu"],
                 v_min_mem=participant["v_min_mem"],
                 v_max_mem=participant["v_max_mem"],
+                remote_signer_min_cpu=participant["remote_signer_min_cpu"],
+                remote_signer_max_cpu=participant["remote_signer_max_cpu"],
+                remote_signer_min_mem=participant["remote_signer_min_mem"],
+                remote_signer_max_mem=participant["remote_signer_max_mem"],
                 validator_count=participant["validator_count"],
                 snooper_enabled=participant["snooper_enabled"],
                 count=participant["count"],
@@ -399,6 +408,10 @@ def parse_network_params(input_args):
                     )
                 )
             participant["validator_client_image"] = default_image
+
+        participant["remote_signer_image"] = (
+            participant["remote_signer_image"] or "consensys/web3signer:latest"
+        )
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == False:
@@ -626,14 +639,19 @@ def default_participant():
         "validator_client_type": "",
         "validator_client_log_level": "",
         "validator_client_image": "",
+        "use_remote_signer": False,
+        "remote_signer_image": "",
         "cl_tolerations": [],
         "validator_tolerations": [],
+        "remote_signer_tolerations": [],
         "tolerations": [],
         "node_selectors": {},
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
         "validator_extra_labels": {},
+        "remote_signer_extra_params": [],
+        "remote_signer_extra_labels": {},
         "builder_network_params": None,
         "el_min_cpu": 0,
         "el_max_cpu": 0,
@@ -647,6 +665,10 @@ def default_participant():
         "v_max_cpu": 0,
         "v_min_mem": 0,
         "v_max_mem": 0,
+        "remote_signer_min_cpu": 0,
+        "remote_signer_max_cpu": 0,
+        "remote_signer_min_mem": 0,
+        "remote_signer_max_mem": 0,
         "validator_count": None,
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,

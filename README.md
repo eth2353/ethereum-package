@@ -238,6 +238,16 @@ participants:
   # - teku: consensys/teku:latest
   validator_client_image: ""
 
+  # A list of optional extra params that will be passed to the CL to run separate Beacon and validator nodes
+  # Only possible if use_separate_validator_client is enabled
+  # Not supported for Lighthouse
+  # Defaults to false
+  use_remote_signer: false
+
+  # The Docker image that should be used for the remote signer
+  # Defaults to consensys/web3signer:latest
+  remote_signer_image: ""
+
   # Persistent storage size for the CL client container (in MB)
   # Defaults to 0, which means that the default size for the client will be used
   # Default values can be found in /src/package_io/constants.star VOLUME_SIZE

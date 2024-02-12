@@ -13,6 +13,8 @@ def get_config(
     cl_client_context,
     el_client_context,
     node_keystore_files,
+    use_remote_signer,
+    remote_signer_url,
     v_min_cpu,
     v_max_cpu,
     v_min_mem,
@@ -44,8 +46,6 @@ def get_config(
             PRYSM_BEACON_RPC_PORT,
         ),
         "--beacon-rest-api-provider=" + beacon_http_url,
-        "--wallet-dir=" + validator_keys_dirpath,
-        "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -59,6 +59,23 @@ def get_config(
         + "-"
         + el_client_context.client_name,
     ]
+
+    if use_remote_signer:
+        cmd.extend(
+            [
+                "--validators-external-signer-url=" + remote_signer_url,
+                "--validators-external-signer-public-keys="
+                + remote_signer_url
+                + "/api/v1/eth2/publicKeys",
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--wallet-dir=" + validator_keys_dirpath,
+                "--wallet-password-file=" + validator_secrets_dirpath,
+            ]
+        )
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

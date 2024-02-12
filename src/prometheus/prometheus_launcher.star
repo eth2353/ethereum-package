@@ -24,6 +24,7 @@ def launch_prometheus(
     el_client_contexts,
     cl_client_contexts,
     validator_client_contexts,
+    remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -33,6 +34,7 @@ def launch_prometheus(
         el_client_contexts,
         cl_client_contexts,
         validator_client_contexts,
+        remote_signer_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
@@ -54,6 +56,7 @@ def get_metrics_jobs(
     el_client_contexts,
     cl_client_contexts,
     validator_client_contexts,
+    remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -133,6 +136,27 @@ def get_metrics_jobs(
             "service": context.service_name,
             "client_type": VALIDATOR_CLIENT_TYPE,
             "client_name": context.client_name,
+        }
+
+        metrics_jobs.append(
+            new_metrics_job(
+                job_name=metrics_info[METRICS_INFO_NAME_KEY],
+                endpoint=metrics_info[METRICS_INFO_URL_KEY],
+                metrics_path=metrics_info[METRICS_INFO_PATH_KEY],
+                labels=labels,
+                scrape_interval=scrape_interval,
+            )
+        )
+
+    # Adding remote signer metrics jobs
+    for context in remote_signer_contexts:
+        if context == None:
+            continue
+        metrics_info = context.metrics_info
+
+        scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+        labels = {
+            "service": context.service_name,
         }
 
         metrics_jobs.append(

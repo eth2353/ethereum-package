@@ -21,6 +21,8 @@ def get_config(
     cl_client_context,
     el_client_context,
     node_keystore_files,
+    use_remote_signer,
+    remote_signer_url,
     v_min_cpu,
     v_max_cpu,
     v_min_mem,
@@ -51,8 +53,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beaconNodes=" + beacon_http_url,
-        "--keystoresDir=" + validator_keys_dirpath,
-        "--secretsDir=" + validator_secrets_dirpath,
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -66,6 +66,21 @@ def get_config(
         + "-"
         + el_client_context.client_name,
     ]
+
+    if use_remote_signer:
+        cmd.extend(
+            [
+                "--externalSigner.url=" + remote_signer_url,
+                "--externalSigner.fetch",
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--keystoresDir=" + validator_keys_dirpath,
+                "--secretsDir=" + validator_secrets_dirpath,
+            ]
+        )
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

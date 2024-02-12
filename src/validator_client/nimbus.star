@@ -10,6 +10,8 @@ def get_config(
     cl_client_context,
     el_client_context,
     node_keystore_files,
+    use_remote_signer,
+    remote_signer_url,
     v_min_cpu,
     v_max_cpu,
     v_min_mem,
@@ -33,8 +35,6 @@ def get_config(
 
     cmd = [
         "--beacon-node=" + beacon_http_url,
-        "--validators-dir=" + validator_keys_dirpath,
-        "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -47,6 +47,20 @@ def get_config(
         + "-"
         + el_client_context.client_name,
     ]
+
+    if use_remote_signer:
+        cmd.extend(
+            [
+                "--web3-signer-url=" + remote_signer_url,
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--validators-dir=" + validator_keys_dirpath,
+                "--secrets-dir=" + validator_secrets_dirpath,
+            ]
+        )
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

@@ -29,6 +29,7 @@ prysm = import_module("./cl/prysm/prysm_launcher.star")
 teku = import_module("./cl/teku/teku_launcher.star")
 
 validator_client = import_module("./validator_client/validator_client_launcher.star")
+remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 snooper = import_module("./snooper/snooper_engine_launcher.star")
 
@@ -714,6 +715,7 @@ def launch_participant_network(
     plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_validator_client_contexts = []
+    all_remote_signer_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
@@ -729,6 +731,7 @@ def launch_participant_network(
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
             all_validator_client_contexts.append(None)
+            all_remote_signer_contexts.append(None)
             continue
 
         if (
@@ -739,6 +742,7 @@ def launch_participant_network(
 
         if not participant.use_separate_validator_client:
             all_validator_client_contexts.append(None)
+            all_remote_signer_contexts.append(None)
             continue
 
         el_client_context = all_el_client_contexts[index]
@@ -751,9 +755,31 @@ def launch_participant_network(
             "Using separate validator client for participant #{0}".format(index_str)
         )
 
-        vc_keystores = None
+        node_keystore_files = None
         if participant.validator_count != 0:
-            vc_keystores = preregistered_validator_keys_for_nodes[index]
+            node_keystore_files = preregistered_validator_keys_for_nodes[index]
+
+        remote_signer_context = None
+        if participant.use_remote_signer:
+            remote_signer_context = remote_signer.launch(
+                plan=plan,
+                launcher=remote_signer.new_remote_signer_launcher(
+                    el_cl_genesis_data=el_cl_data
+                ),
+                service_name="remote-signer-{0}".format(index_str),
+                image=participant.remote_signer_image,
+                node_keystore_files=node_keystore_files,
+                remote_signer_min_cpu=participant.remote_signer_min_cpu,
+                remote_signer_max_cpu=participant.remote_signer_max_cpu,
+                remote_signer_min_mem=participant.remote_signer_min_mem,
+                remote_signer_max_mem=participant.remote_signer_max_mem,
+                extra_params=participant.remote_signer_extra_params,
+                extra_labels=participant.remote_signer_extra_labels,
+                remote_signer_tolerations=participant.remote_signer_tolerations,
+                participant_tolerations=participant.tolerations,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+            )
 
         validator_client_context = validator_client.launch(
             plan=plan,
@@ -769,7 +795,11 @@ def launch_participant_network(
             global_log_level=global_log_level,
             cl_client_context=cl_client_context,
             el_client_context=el_client_context,
-            node_keystore_files=vc_keystores,
+            node_keystore_files=node_keystore_files,
+            use_remote_signer=participant.use_remote_signer,
+            remote_signer_url=remote_signer_context.remote_signer_http_url
+            if participant.use_remote_signer
+            else None,
             v_min_cpu=participant.v_min_cpu,
             v_max_cpu=participant.v_max_cpu,
             v_min_mem=participant.v_min_mem,
@@ -784,11 +814,15 @@ def launch_participant_network(
             node_selectors=node_selectors,
         )
         all_validator_client_contexts.append(validator_client_context)
+        all_remote_signer_contexts.append(remote_signer_context)
 
         if validator_client_context and validator_client_context.metrics_info:
             validator_client_context.metrics_info[
                 "config"
             ] = participant.prometheus_config
+
+        if remote_signer_context and remote_signer_context.metrics_info:
+            remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
     all_participants = []
 
@@ -800,6 +834,7 @@ def launch_participant_network(
         el_client_context = all_el_client_contexts[index]
         cl_client_context = all_cl_client_contexts[index]
         validator_client_context = all_validator_client_contexts[index]
+        remote_signer_context = all_remote_signer_contexts[index]
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -822,6 +857,7 @@ def launch_participant_network(
             el_client_context,
             cl_client_context,
             validator_client_context,
+            remote_signer_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,

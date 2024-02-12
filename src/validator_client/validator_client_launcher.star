@@ -28,6 +28,8 @@ def launch(
     cl_client_context,
     el_client_context,
     node_keystore_files,
+    use_remote_signer,
+    remote_signer_url,
     v_min_cpu,
     v_max_cpu,
     v_min_mem,
@@ -59,6 +61,9 @@ def launch(
     v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else MAX_MEMORY
 
     if validator_client_type == constants.VC_CLIENT_TYPE.lighthouse:
+        if use_remote_signer:
+            fail("Remote signer is not supported for Lighthouse")
+
         config = lighthouse.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
@@ -87,6 +92,8 @@ def launch(
             cl_client_context=cl_client_context,
             el_client_context=el_client_context,
             node_keystore_files=node_keystore_files,
+            use_remote_signer=use_remote_signer,
+            remote_signer_url=remote_signer_url,
             v_min_cpu=v_min_cpu,
             v_max_cpu=v_max_cpu,
             v_min_mem=v_min_mem,
@@ -104,6 +111,8 @@ def launch(
             cl_client_context=cl_client_context,
             el_client_context=el_client_context,
             node_keystore_files=node_keystore_files,
+            use_remote_signer=use_remote_signer,
+            remote_signer_url=remote_signer_url,
             v_min_cpu=v_min_cpu,
             v_max_cpu=v_max_cpu,
             v_min_mem=v_min_mem,
@@ -121,6 +130,8 @@ def launch(
             cl_client_context=cl_client_context,
             el_client_context=el_client_context,
             node_keystore_files=node_keystore_files,
+            use_remote_signer=use_remote_signer,
+            remote_signer_url=remote_signer_url,
             v_min_cpu=v_min_cpu,
             v_max_cpu=v_max_cpu,
             v_min_mem=v_min_mem,
@@ -142,6 +153,8 @@ def launch(
             cl_client_context=cl_client_context,
             el_client_context=el_client_context,
             node_keystore_files=node_keystore_files,
+            use_remote_signer=use_remote_signer,
+            remote_signer_url=remote_signer_url,
             v_min_cpu=v_min_cpu,
             v_max_cpu=v_max_cpu,
             v_min_mem=v_min_mem,

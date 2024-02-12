@@ -10,6 +10,8 @@ def get_config(
     cl_client_context,
     el_client_context,
     node_keystore_files,
+    use_remote_signer,
+    remote_signer_url,
     v_min_cpu,
     v_max_cpu,
     v_min_mem,
@@ -37,10 +39,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beacon-node-api-endpoint=" + beacon_http_url,
-        "--validator-keys={0}:{1}".format(
-            validator_keys_dirpath,
-            validator_secrets_dirpath,
-        ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti="
@@ -55,6 +53,21 @@ def get_config(
             validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
         ),
     ]
+
+    if use_remote_signer:
+        cmd.extend(
+            [
+                "--validators-external-signer-url=" + remote_signer_url,
+                "--validators-external-signer-public-keys=external-signer",
+            ]
+        )
+    else:
+        cmd.append(
+            "--validator-keys={0}:{1}".format(
+                validator_keys_dirpath,
+                validator_secrets_dirpath,
+            )
+        )
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
